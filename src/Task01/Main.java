@@ -97,12 +97,14 @@ public class Main {
         // Set the clear color
         glClearColor(.20f, .20f, .20f, 0.0f);
 
+        Renderer renderer = new Renderer();
+
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-
+            renderer.display();
 
             glfwSwapBuffers(window); // swap the color buffers
 
