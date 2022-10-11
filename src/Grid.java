@@ -1,8 +1,9 @@
-import java.util.Arrays;
+import lwjglutils.OGLBuffers;
+
+import static org.lwjgl.opengl.GL33.GL_TRIANGLES;
 
 public class Grid {
-    private final int[] indices;
-    private final float[] vertices;
+    private final OGLBuffers buffers;
 
     /**
      * GL_TRIANGLES
@@ -11,8 +12,8 @@ public class Grid {
      * @param n vertex count in column
      */
     public Grid(final int m, final int n) {
-        this.vertices = new float[2 * m * n];
-        this.indices = new int[3 * 2 * (m - 1) * (n - 1)];
+        float[] vertices = new float[2 * m * n];
+        int[] indices = new int[3 * 2 * (m - 1) * (n - 1)];
 
         // Vertices <0;1>
         int index = 0;
@@ -23,33 +24,31 @@ public class Grid {
             }
         }
 
-        System.out.println(Arrays.toString(vertices));
-        System.out.println("----------");
-
-        // Indices
+        // Indices orientace?!
         index = 0;
         for (int i = 0; i < m - 1; i++) {
+            int offset = i * m;
             for (int j = 0; j < n - 1; j++)
             {
-                indices[index++] = j * (i + 1);
-                indices[index++] = (j + n) * (i + 1);
-                indices[index++] = (j + 1) * (i + 1);
+                indices[index++] = j + offset;
+                indices[index++] = (j + n) + offset;
+                indices[index++] = (j + 1) + offset;
 
-                indices[index++] = (j + 1) * (i + 1);
-                indices[index++] = (j + n) * (i + 1);
-                indices[index++] = (j + n + 1) * (i + 1);
+                indices[index++] = (j + 1) + offset;
+                indices[index++] = (j + n) + offset;
+                indices[index++] = (j + n + 1) + offset;
             }
         }
-        System.out.println(Arrays.toString(indices));
-        System.out.println("----------");
+
+        OGLBuffers.Attrib[] attributes = new OGLBuffers.Attrib[] {
+                new OGLBuffers.Attrib("inPos", 2)
+        };
+
+        this.buffers = new OGLBuffers(vertices, attributes, indices);
     }
 
-    public int[] getIndices() {
-        return indices;
-    }
-
-    public float[] getVertices() {
-        return vertices;
+    public void render(int shaderProgram) {
+        buffers.draw(GL_TRIANGLES, shaderProgram);
     }
 }
 

@@ -1,7 +1,5 @@
 #version 330
 
-in vec4 o_Color;
-
 uniform float u_ColorR;
 
 out vec4 outColor;

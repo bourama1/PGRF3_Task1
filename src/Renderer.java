@@ -1,64 +1,43 @@
 import lwjglutils.ShaderUtils;
+import transforms.Camera;
+import transforms.Mat4;
+import transforms.Mat4PerspRH;
+import transforms.Vec3D;
 
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
-    private final int[] indices;
+    private Camera camera;
+    private Mat4 projection;
+    private final int shaderProgram;
+    private final Grid grid;
+
     public Renderer() {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        camera = new Camera()
+                .withPosition(new Vec3D(0.5f,-2f, 2f))
+                .withAzimuth(Math.toRadians(90))
+                .withZenith(Math.toRadians(-45));
+
+        projection = new Mat4PerspRH(Math.PI / 3, 600 / (float) 800, 0.1f, 50.0f);
+
         //Shaders
-        int shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
+        this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
         glUseProgram(shaderProgram);
-
-        /*
-        //Vertex positions only
-        float[] vertices  = {
-                -1.0f, -1.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f
-        };
-
-        //Index TRIANGLES
-        this.indices = new int[] {
-                0, 1, 2
-        };
-        */
-
-        Grid grid = new Grid(4,4);
-
-        this.indices = grid.getIndices();
-        float[] vertices = grid.getVertices();
-
-        //Vertex Buffer
-        int vb = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vb);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-
-        //Index Buffer
-        int ib = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-
-        int locationPos = glGetAttribLocation(shaderProgram, "inPos");
-        glVertexAttribPointer(locationPos, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
-        glEnableVertexAttribArray(locationPos);
-
-        /*
-        int locationPos = glGetAttribLocation(shaderProgram, "inPos");
-        glVertexAttribPointer(locationPos, 2, GL_FLOAT, false, 5 * Float.BYTES, 0);
-        glEnableVertexAttribArray(locationPos);
-
-        int locationColor = glGetAttribLocation(shaderProgram, "inColor");
-        glVertexAttribPointer(locationColor, 3, GL_FLOAT, false, 5 * Float.BYTES, 8);
-        glEnableVertexAttribArray(locationColor);
-        */
 
         int loc_uColor = glGetUniformLocation(shaderProgram, "u_ColorR");
         glUniform1f(loc_uColor, 1.f);
+
+        int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
+        glUniformMatrix4fv(loc_uProj, false, camera.getViewMatrix().floatArray());
+
+        int loc_uView = glGetUniformLocation(shaderProgram, "u_View");
+        glUniformMatrix4fv(loc_uView, false, projection.floatArray());
+
+        grid = new Grid(4,4);
     }
     public void display(){
-        glDrawElements(GL_TRIANGLES, indices.length,  GL_UNSIGNED_INT, 0);
+        grid.render(shaderProgram);
     }
 }
