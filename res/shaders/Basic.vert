@@ -3,9 +3,9 @@
 in vec2 inPos;
 in vec3 inColor;
 
-out vec3 vertColor;
+out vec4 o_Color;
 
 void main() {
-    vertColor = inColor;
     gl_Position = vec4(inPos, 0.0f, 1.0f);
+    o_Color = vec4(inColor, 1.0f);
 }
