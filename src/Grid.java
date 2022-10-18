@@ -1,6 +1,6 @@
 import lwjglutils.OGLBuffers;
 
-import static org.lwjgl.opengl.GL33.GL_TRIANGLES;
+import java.util.Arrays;
 
 public class Grid {
     private final OGLBuffers buffers;
@@ -19,12 +19,12 @@ public class Grid {
         int index = 0;
         for (int i = 0; i < m; i += 1) {
             for (int j = 0; j < n; j += 1) {
-                vertices[index++] = (float) j / (n - 1);
-                vertices[index++] = (float) i / (m - 1);
+                vertices[index++] = j / (float) (n - 1);
+                vertices[index++] = i / (float) (m - 1);
             }
         }
 
-        // Indices orientace?!
+        // Indices
         index = 0;
         for (int i = 0; i < m - 1; i++) {
             int offset = i * m;
@@ -39,16 +39,18 @@ public class Grid {
                 indices[index++] = (j + n + 1) + offset;
             }
         }
+        System.out.println(Arrays.toString(indices));
 
-        OGLBuffers.Attrib[] attributes = new OGLBuffers.Attrib[] {
-                new OGLBuffers.Attrib("inPos", 2)
+        OGLBuffers.Attrib[] attrs = new OGLBuffers.Attrib[] {
+                new OGLBuffers.Attrib("inPosition", 2),
         };
 
-        this.buffers = new OGLBuffers(vertices, attributes, indices);
+
+        this.buffers = new OGLBuffers(vertices, attrs, indices);
     }
 
-    public void render(int shaderProgram) {
-        buffers.draw(GL_TRIANGLES, shaderProgram);
+    public OGLBuffers getBuffers() {
+        return buffers;
     }
 }
 
