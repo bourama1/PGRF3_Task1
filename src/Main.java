@@ -15,6 +15,10 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Main {
     // The window handle
     private long window;
+    private AbstractRenderer renderer;
+    public Main(AbstractRenderer renderer) {
+        this.renderer = renderer;
+    }
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -51,10 +55,11 @@ public class Main {
             throw new RuntimeException("Failed to create the GLFW window");
 
         // Set up a key callback. It will be called every time a key is pressed, repeated or released.
-        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-                glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-        });
+        glfwSetKeyCallback(window, renderer.getKeyCallback());
+        glfwSetWindowSizeCallback(window,renderer.getWsCallback());
+        glfwSetMouseButtonCallback(window,renderer.getMouseCallback());
+        glfwSetCursorPosCallback(window,renderer.getCursorCallback());
+        glfwSetScrollCallback(window,renderer.getScrollCallback());
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
@@ -94,9 +99,7 @@ public class Main {
 
         // Set the clear color
         glClearColor(.20f, .20f, .20f, 0.0f);
-
-        Renderer renderer = new Renderer();
-
+        renderer.init();
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
@@ -113,6 +116,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        new Main().run();
+        new Main(new Renderer()).run();
     }
 }
