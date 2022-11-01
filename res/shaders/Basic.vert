@@ -23,9 +23,8 @@ void main() {
 
     //Phong ligth
     vec4 lightPosition = u_View * vec4(lightSource, 1.f);
-    vec3 normalVector = transpose(inverse(mat3(u_View))) * getNormal();
-
-    vec3 toLightVector = lightPosition.xyz - objectPosition.xyz;
+    normalVector = transpose(inverse(mat3(u_View))) * getNormal();
+    toLightVector = lightPosition.xyz - objectPosition.xyz;
 
     gl_Position = u_Proj * objectPosition;
 }
