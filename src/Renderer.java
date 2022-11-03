@@ -1,3 +1,4 @@
+import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
@@ -8,6 +9,7 @@ import transforms.Mat4;
 import transforms.Mat4PerspRH;
 import transforms.Vec3D;
 
+import java.io.IOException;
 import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -19,7 +21,9 @@ public class Renderer extends AbstractRenderer {
     private int shaderProgram;
     private Grid grid;
     private double ox, oy;
-    private boolean mouseButton1 = false;
+    private OGLTexture2D textureBase;
+    private OGLTexture2D textureNormal;
+
 
     @Override
     public void init() {
@@ -46,6 +50,13 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
         grid = new Grid(20, 20);
+
+        try {
+            textureBase = new OGLTexture2D("./textures/bricks.jpg");
+            textureNormal = new OGLTexture2D("./textures/bricksn.png");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -54,6 +65,9 @@ public class Renderer extends AbstractRenderer {
         int loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
 
+
+        textureBase.bind(shaderProgram, "textureBase", 0);
+        textureNormal.bind(shaderProgram, "textureNormal", 1);
         grid.getBuffers().draw(GL_TRIANGLES, shaderProgram);
     }
 
@@ -72,7 +86,33 @@ public class Renderer extends AbstractRenderer {
         return cpCallbacknew;
     }
 
-    private GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
+    private final GLFWMouseButtonCallback mbCallback = new GLFWMouseButtonCallback () {
+        @Override
+        public void invoke(long window, int button, int action, int mods) {
+
+            if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
+                DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
+                DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
+                glfwGetCursorPos(window, xBuffer, yBuffer);
+                ox = xBuffer.get(0);
+                oy = yBuffer.get(0);
+            }
+
+            if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE){
+                DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
+                DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
+                glfwGetCursorPos(window, xBuffer, yBuffer);
+                double x = xBuffer.get(0);
+                double y = yBuffer.get(0);
+                camera = camera.addAzimuth(Math.PI * (ox - x) / 800)
+                        .addZenith(Math.PI * (oy - y) / 800);
+                ox = x;
+                oy = y;
+            }
+        }
+    };
+
+    private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
         @Override
         public void invoke(long window, double dx, double dy) {
             if (dy < 0)
@@ -82,46 +122,4 @@ public class Renderer extends AbstractRenderer {
 
         }
     };
-
-    private GLFWMouseButtonCallback mbCallback = new GLFWMouseButtonCallback () {
-        @Override
-        public void invoke(long window, int button, int action, int mods) {
-            mouseButton1 = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
-
-            if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
-                mouseButton1 = true;
-                DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
-                DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
-                glfwGetCursorPos(window, xBuffer, yBuffer);
-                ox = xBuffer.get(0);
-                oy = yBuffer.get(0);
-            }
-
-            if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE){
-                mouseButton1 = false;
-                DoubleBuffer xBuffer = BufferUtils.createDoubleBuffer(1);
-                DoubleBuffer yBuffer = BufferUtils.createDoubleBuffer(1);
-                glfwGetCursorPos(window, xBuffer, yBuffer);
-                double x = xBuffer.get(0);
-                double y = yBuffer.get(0);
-                camera = camera.addAzimuth((double) Math.PI * (ox - x) / (float) 800)
-                        .addZenith((double) Math.PI * (oy - y) / (float) 800);
-                ox = x;
-                oy = y;
-            }
-        }
-    };
-
-    private GLFWCursorPosCallback cpCallbacknew = new GLFWCursorPosCallback() {
-        @Override
-        public void invoke(long window, double x, double y) {
-            if (mouseButton1) {
-                camera = camera.addAzimuth((double) Math.PI * (ox - x) / (float) 800)
-                        .addZenith((double) Math.PI * (oy - y) / (float) 800);
-                ox = x;
-                oy = y;
-            }
-        }
-    };
-
 }
