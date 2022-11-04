@@ -48,7 +48,7 @@ public abstract class AbstractRenderer {
 
     public void display() {
         glViewport(0, 0, width, height);
-        String text = new String(this.getClass().getName() + ": look at console and try keys, mouse, wheel and window interaction " );
+        String text = this.getClass().getName() + ": look at console and try keys, mouse, wheel and window interaction ";
 
         pass++;
         // Set the clear color
@@ -106,20 +106,20 @@ public abstract class AbstractRenderer {
             double y = yBuffer.get(0);
 
             if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS){
-                System.out.println("Mouse button 1 is pressed at coursor position [" + x + ", " + y + "]");
+                System.out.println("Mouse button 1 is pressed at cursor position [" + x + ", " + y + "]");
             }
 
             if (button==GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE){
-                System.out.println("Mouse button 1 is released at coursor position [" + x + ", " + y + "]");
+                System.out.println("Mouse button 1 is released at cursor position [" + x + ", " + y + "]");
             }
         }
 
     };
 
-    protected GLFWCursorPosCallback cpCallbacknew = new GLFWCursorPosCallback() {
+    protected GLFWCursorPosCallback cpCallback = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long window, double x, double y) {
-            System.out.println("Coursor position [" + x + ", " + y + "]");
+            System.out.println("Cursor position [" + x + ", " + y + "]");
         }
     };
 
@@ -142,14 +142,11 @@ public abstract class AbstractRenderer {
     }
 
     public GLFWCursorPosCallback getCursorCallback() {
-        return cpCallbacknew;
+        return cpCallback;
     }
 
     public GLFWScrollCallback getScrollCallback() {
         return scrollCallback;
     }
 
-    public void dispose(){
-
-    }
 }

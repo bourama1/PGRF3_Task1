@@ -1,5 +1,7 @@
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
+import objects.GridList;
+import objects.GridStrip;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
@@ -19,7 +21,8 @@ public class Renderer extends AbstractRenderer {
     private Camera camera;
     private Mat4 projection;
     private int shaderProgram;
-    private Grid grid;
+    private GridList gridList;
+    private GridStrip gridStrip;
     private double ox, oy;
     private OGLTexture2D textureBase;
     private OGLTexture2D textureNormal;
@@ -29,6 +32,8 @@ public class Renderer extends AbstractRenderer {
     public void init() {
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
 
         camera = new Camera()
                 .withPosition(new Vec3D(0.f, 0.f, 0.f))
@@ -49,11 +54,12 @@ public class Renderer extends AbstractRenderer {
         int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
-        grid = new Grid(20, 20);
+        gridList = new GridList(20,20);
+        gridStrip = new GridStrip(20,20);
 
         try {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
-            textureNormal = new OGLTexture2D("./textures/bricksn.png");
+            textureNormal = new OGLTexture2D("textures/bricksNormal.png");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +74,9 @@ public class Renderer extends AbstractRenderer {
 
         textureBase.bind(shaderProgram, "textureBase", 0);
         textureNormal.bind(shaderProgram, "textureNormal", 1);
-        grid.getBuffers().draw(GL_TRIANGLES, shaderProgram);
+
+        //gridList.getBuffers().draw(GL_TRIANGLES, shaderProgram);
+        gridStrip.getBuffers().draw(GL_TRIANGLE_STRIP, shaderProgram);
     }
 
     @Override
@@ -83,8 +91,15 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public GLFWCursorPosCallback getCursorCallback() {
-        return cpCallbacknew;
+        return cpCallback;
     }
+
+    private final GLFWCursorPosCallback cpCallback = new GLFWCursorPosCallback() {
+        @Override
+        public void invoke(long window, double xpos, double ypos) {
+
+        }
+    };
 
     private final GLFWMouseButtonCallback mbCallback = new GLFWMouseButtonCallback () {
         @Override
