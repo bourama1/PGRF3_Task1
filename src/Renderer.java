@@ -26,6 +26,7 @@ public class Renderer extends AbstractRenderer {
     private double ox, oy;
     private OGLTexture2D textureBase;
     private OGLTexture2D textureNormal;
+    private OGLTexture2D textureHeight;
 
 
     @Override
@@ -60,6 +61,7 @@ public class Renderer extends AbstractRenderer {
         try {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
             textureNormal = new OGLTexture2D("textures/bricksNormal.png");
+            textureHeight = new OGLTexture2D("textures/bricksHeight.png");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -74,6 +76,7 @@ public class Renderer extends AbstractRenderer {
 
         textureBase.bind(shaderProgram, "textureBase", 0);
         textureNormal.bind(shaderProgram, "textureNormal", 1);
+        textureHeight.bind(shaderProgram, "textureHeight", 2);
 
         //gridList.getBuffers().draw(GL_TRIANGLES, shaderProgram);
         gridStrip.getBuffers().draw(GL_TRIANGLE_STRIP, shaderProgram);
