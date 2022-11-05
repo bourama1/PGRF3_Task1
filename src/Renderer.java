@@ -1,7 +1,6 @@
+import Utils.Topology;
 import lwjglutils.OGLTexture2D;
 import lwjglutils.ShaderUtils;
-import objects.GridList;
-import objects.GridStrip;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -14,20 +13,18 @@ import java.nio.DoubleBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL33.*;
+import static Utils.Const.*;
 
 public class Renderer extends AbstractRenderer {
     private Camera camera;
     private Mat4 projection;
     private Mat4 orthogonal;
     private int shaderProgram;
-    private GridList gridList;
-    private GridStrip gridStrip;
+    private Grid grid;
     private double ox, oy;
     private OGLTexture2D textureBase;
     private OGLTexture2D textureNormal;
     private OGLTexture2D textureHeight;
-    private final float camSpeed = 0.1f;
-
 
     @Override
     public void init() {
@@ -41,8 +38,8 @@ public class Renderer extends AbstractRenderer {
                 .withZenith(Math.PI * -0.125)
                 .withFirstPerson(false)
                 .withRadius(3.f);
-        projection = new Mat4PerspRH(Math.PI / 3, 600 / (float) 800, 0.1f, 50.f);
-        orthogonal = new Mat4OrthoRH(800, 600, 0.1, 100);
+        projection = new Mat4PerspRH(Math.PI / 3, HEIGHT / (double) WIDTH, 0.1f, 50.f);
+        orthogonal = new Mat4OrthoRH(HEIGHT, WIDTH, 0.0, 100.0);
 
         //Shaders
         this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
@@ -51,12 +48,12 @@ public class Renderer extends AbstractRenderer {
         // Color
         int loc_uColorR = glGetUniformLocation(shaderProgram, "u_ColorR");
         glUniform1f(loc_uColorR, 1.f);
+
         // Proj
         int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
-        gridList = new GridList(20,20);
-        gridStrip = new GridStrip(20,20);
+        grid = new Grid(20,20, Topology.STRIP);
 
         try {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
@@ -78,8 +75,7 @@ public class Renderer extends AbstractRenderer {
         textureNormal.bind(shaderProgram, "textureNormal", 1);
         textureHeight.bind(shaderProgram, "textureHeight", 2);
 
-        //gridList.getBuffers().draw(GL_TRIANGLES, shaderProgram);
-        gridStrip.getBuffers().draw(GL_TRIANGLE_STRIP, shaderProgram);
+        grid.getBuffers().draw(GL_TRIANGLE_STRIP, shaderProgram);
     }
 
     @Override
@@ -125,8 +121,8 @@ public class Renderer extends AbstractRenderer {
                 glfwGetCursorPos(window, xBuffer, yBuffer);
                 double x = xBuffer.get(0);
                 double y = yBuffer.get(0);
-                camera = camera.addAzimuth(Math.PI * (ox - x) / 800)
-                        .addZenith(Math.PI * (oy - y) / 800);
+                camera = camera.addAzimuth(Math.PI * (ox - x) / (double) WIDTH)
+                        .addZenith(Math.PI * (oy - y) / (double) WIDTH);
                 ox = x;
                 oy = y;
             }
@@ -137,9 +133,9 @@ public class Renderer extends AbstractRenderer {
         @Override
         public void invoke(long window, double dx, double dy) {
             if (dy < 0)
-                camera = camera.mulRadius(1 + camSpeed);
+                camera = camera.mulRadius(1 + CAM_SPEED);
             else
-                camera = camera.mulRadius(1 - camSpeed);
+                camera = camera.mulRadius(1 - CAM_SPEED);
 
         }
     };
@@ -157,13 +153,13 @@ public class Renderer extends AbstractRenderer {
             if (key == GLFW_KEY_P)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             if (key == GLFW_KEY_W)
-                camera = camera.forward(camSpeed);
+                camera = camera.forward(CAM_SPEED);
             if (key == GLFW_KEY_S)
-                camera = camera.backward(camSpeed);
+                camera = camera.backward(CAM_SPEED);
             if (key == GLFW_KEY_A)
-                camera = camera.left(camSpeed);
+                camera = camera.left(CAM_SPEED);
             if (key == GLFW_KEY_D)
-                camera = camera.right(camSpeed);
+                camera = camera.right(CAM_SPEED);
         }
     };
 }
