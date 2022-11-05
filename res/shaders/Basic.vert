@@ -4,56 +4,53 @@ in vec2 inPosition;
 
 uniform mat4 u_View;
 uniform mat4 u_Proj;
+uniform mat4 u_Model;
+
+uniform int paramFunc;
 
 out vec2 texCoords;
 out vec3 viewVec;
 out vec3 lightVec;
 
+const float delta = 0.001f;
 vec3 lightSource = vec3(0.5,0.5,0.5);
 
-vec3 getNormal(){
-    float zu = 0.f;
-    float zv = 0.f;
-    vec3 u = vec3(1,0,zu);
-    vec3 v = vec3(0,1,zv);
-    return cross(u,v);
+vec3 paramPos(vec2 inPosition){
+    switch (paramFunc) {
+            default: return vec3(inPosition, 0.f);
+    }
 }
 
+vec3 getNormal(vec2 inPos){
+    vec3 tx = paramPos(inPos + vec2(delta,0)) - paramPos(inPos - vec2(delta,0));
+    vec3 ty = paramPos(inPos + vec2(0,delta)) - paramPos(inPos - vec2(0,delta));
+    return cross(tx,ty);
+}
 
-vec3 getTangent(vec3 normal) {
-    vec3 tangent;
-
-    vec3 c1 = cross(normal, vec3(0.0, 0.0, 1.0));
-    vec3 c2 = cross(normal, vec3(0.0, 1.0, 0.0));
-
-    if(length(c1) > length(c2))
-    {
-        tangent = c1;
-    }
-    else
-    {
-        tangent = c2;
-    }
-    return tangent;
+mat3 getTBN(vec2 inPos) {
+    vec3 tx = paramPos(inPos + vec2(delta,0)) - paramPos(inPos - vec2(delta,0));
+    vec3 ty = paramPos(inPos + vec2(0,delta)) - paramPos(inPos - vec2(0,delta));
+    tx = normalize(tx);
+    ty = normalize(ty);
+    vec3 tz = cross(tx,ty);
+    ty = cross(tz,tx);
+    return mat3(tx,ty,tz);
 }
 
 
 void main() {
     texCoords = inPosition;
-    vec4 objectPosition = u_View * vec4(inPosition, 0.f, 1.f);
+    vec4 objectPosition = u_View * u_Model * vec4(paramPos(inPosition), 1.f);
+    vec3 viewPos = vec3(u_View[0][3], u_View[1][3], u_View[2][3]);
     vec3 viewDirection = - normalize(objectPosition.xyz);
 
     //Phong ligth
     vec4 lightPosition = u_View * vec4(lightSource, 1.);
     vec3 toLightVector = normalize(lightPosition.xyz - objectPosition.xyz);
-    vec3 normal = getNormal();
-    normal = inverse(transpose(mat3(u_View)))*normal;
+    vec3 normal = getNormal(inPosition);
+    normal = inverse(transpose(mat3(u_View * u_Model))) * normal;
 
-    vec3 tangent = mat3(u_View) * getTangent(normal);
-    vec3 bitangent = cross(normalize(normal), normalize(tangent));
-    tangent = cross(bitangent, normal);
-
-    mat3 tbn = mat3(tangent, bitangent, normal);
+    mat3 tbn = getTBN(inPosition);
 
     viewVec = transpose(tbn) * viewDirection;
     lightVec = transpose(tbn) * toLightVector;

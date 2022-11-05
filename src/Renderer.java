@@ -19,6 +19,7 @@ public class Renderer extends AbstractRenderer {
     private Camera camera;
     private Mat4 projection;
     private Mat4 orthogonal;
+    private Mat4 model = new Mat4Identity();
     private int shaderProgram;
     private Grid grid;
     private double ox, oy;
@@ -53,6 +54,10 @@ public class Renderer extends AbstractRenderer {
         int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
+        //Function
+        int loc_uFunction = glGetUniformLocation(shaderProgram, "u_Function");
+        glUniform1i(loc_uFunction, 1);
+
         grid = new Grid(20,20, Topology.STRIP);
 
         try {
@@ -69,6 +74,10 @@ public class Renderer extends AbstractRenderer {
         // View
         int loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
+
+        // Model
+        int loc_uModel = glGetUniformLocation(shaderProgram, "u_Model");
+        glUniformMatrix4fv(loc_uModel, false, model.floatArray());
 
 
         textureBase.bind(shaderProgram, "textureBase", 0);
