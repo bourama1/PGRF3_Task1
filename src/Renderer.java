@@ -4,12 +4,10 @@ import objects.GridList;
 import objects.GridStrip;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
-import transforms.Camera;
-import transforms.Mat4;
-import transforms.Mat4PerspRH;
-import transforms.Vec3D;
+import transforms.*;
 
 import java.io.IOException;
 import java.nio.DoubleBuffer;
@@ -20,6 +18,7 @@ import static org.lwjgl.opengl.GL33.*;
 public class Renderer extends AbstractRenderer {
     private Camera camera;
     private Mat4 projection;
+    private Mat4 orthogonal;
     private int shaderProgram;
     private GridList gridList;
     private GridStrip gridStrip;
@@ -27,11 +26,11 @@ public class Renderer extends AbstractRenderer {
     private OGLTexture2D textureBase;
     private OGLTexture2D textureNormal;
     private OGLTexture2D textureHeight;
+    private final float camSpeed = 0.1f;
 
 
     @Override
     public void init() {
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(65535);
@@ -43,6 +42,7 @@ public class Renderer extends AbstractRenderer {
                 .withFirstPerson(false)
                 .withRadius(3.f);
         projection = new Mat4PerspRH(Math.PI / 3, 600 / (float) 800, 0.1f, 50.f);
+        orthogonal = new Mat4OrthoRH(800, 600, 0.1, 100);
 
         //Shaders
         this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
@@ -97,6 +97,9 @@ public class Renderer extends AbstractRenderer {
         return cpCallback;
     }
 
+    @Override
+    public GLFWKeyCallback getKeyCallback() {return keyCallback;}
+
     private final GLFWCursorPosCallback cpCallback = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long window, double xpos, double ypos) {
@@ -134,10 +137,33 @@ public class Renderer extends AbstractRenderer {
         @Override
         public void invoke(long window, double dx, double dy) {
             if (dy < 0)
-                camera = camera.mulRadius(1.1f);
+                camera = camera.mulRadius(1 + camSpeed);
             else
-                camera = camera.mulRadius(0.9f);
+                camera = camera.mulRadius(1 - camSpeed);
 
+        }
+    };
+
+    private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
+        @Override
+        public void invoke(long window, int key, int scancode, int action, int mods) {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+                // We will detect this in our rendering loop
+                glfwSetWindowShouldClose(window, true);
+            if (key == GLFW_KEY_G)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            if (key == GLFW_KEY_F)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            if (key == GLFW_KEY_P)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            if (key == GLFW_KEY_W)
+                camera = camera.forward(camSpeed);
+            if (key == GLFW_KEY_S)
+                camera = camera.backward(camSpeed);
+            if (key == GLFW_KEY_A)
+                camera = camera.left(camSpeed);
+            if (key == GLFW_KEY_D)
+                camera = camera.right(camSpeed);
         }
     };
 }
