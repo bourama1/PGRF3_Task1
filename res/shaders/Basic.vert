@@ -6,17 +6,38 @@ uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform mat4 u_Model;
 
-uniform int paramFunc;
+uniform int u_Function;
+uniform vec3 u_LightSource;
 
 out vec2 texCoords;
 out vec3 viewVec;
 out vec3 lightVec;
 
 const float delta = 0.001f;
-vec3 lightSource = vec3(0.5,0.5,0.5);
+
+// Object functions
+// Kartezske sour.
+vec3 funcDonut(vec2 inPos) {
+    inPos.x *= 6.3f;
+    inPos.y *= 6.3f;
+    texCoords = mod(texCoords * vec2(2.0, 3.0), vec2(1.0, 1.0));
+    float x = cos(inPos.x) * (3 + cos(inPos.y));
+    float y = sin(inPos.x) * (3 + cos(inPos.y));
+    float z = sin(inPos.y);
+    return vec3(x, y, z);
+}
+
+vec3 funcFlower(vec2 inPos) {
+    float x = inPos.x * 2 - 1;
+    float y = inPos.y * 2 - 1;
+    float z = 0.5f * cos(sqrt(20.f * x * x + 20.f * y * y));
+    return vec3(x, y, z);
+}
 
 vec3 paramPos(vec2 inPosition){
-    switch (paramFunc) {
+    switch (u_Function) {
+            case 0: return funcDonut(inPosition);
+            case 1: return funcFlower(inPosition);
             default: return vec3(inPosition, 0.f);
     }
 }
@@ -41,10 +62,8 @@ void main() {
     vec4 objectPosition = u_View * u_Model * vec4(paramPos(inPosition), 1.f);
 
     //Light
-    vec3 viewPos = vec3(u_View[0][3], u_View[1][3], u_View[2][3]);
-    vec3 viewDirection = normalize((mat3(u_View) * viewPos) - objectPosition.xyz);
-
-    vec4 lightPosition = u_View * vec4(lightSource, 1.);
+    vec3 viewDirection = normalize(- objectPosition.xyz);
+    vec4 lightPosition = u_View * vec4(u_LightSource, 1.);
     vec3 toLightVector = normalize(lightPosition.xyz - objectPosition.xyz);
 
     //TBN

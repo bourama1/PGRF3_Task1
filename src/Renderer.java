@@ -21,6 +21,7 @@ public class Renderer extends AbstractRenderer {
     private Mat4 orthogonal;
     private Mat4 model = new Mat4Identity();
     private int shaderProgram;
+    int loc_uProj;
     private Grid grid;
     private double ox, oy;
     private OGLTexture2D textureBase;
@@ -40,7 +41,7 @@ public class Renderer extends AbstractRenderer {
                 .withFirstPerson(false)
                 .withRadius(3.f);
         projection = new Mat4PerspRH(Math.PI / 3, HEIGHT / (double) WIDTH, 0.1f, 50.f);
-        orthogonal = new Mat4OrthoRH(HEIGHT, WIDTH, 0.0, 100.0);
+        orthogonal = new Mat4OrthoRH(HEIGHT/100.f, WIDTH/100.f, 0.1f, 50.f);
 
         //Shaders
         this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
@@ -51,12 +52,16 @@ public class Renderer extends AbstractRenderer {
         glUniform1f(loc_uColorR, 1.f);
 
         // Proj
-        int loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
+        loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
-        //Function
+        // Function
         int loc_uFunction = glGetUniformLocation(shaderProgram, "u_Function");
         glUniform1i(loc_uFunction, 1);
+
+        // Light Source
+        int loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
+        glUniform3f(loc_uLightSource, 0.5f, 0.5f, 0.5f);
 
         grid = new Grid(20,20, Topology.STRIP);
 
@@ -64,6 +69,8 @@ public class Renderer extends AbstractRenderer {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
             textureNormal = new OGLTexture2D("textures/bricksNormal.png");
             textureHeight = new OGLTexture2D("textures/bricksHeight.png");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +85,6 @@ public class Renderer extends AbstractRenderer {
         // Model
         int loc_uModel = glGetUniformLocation(shaderProgram, "u_Model");
         glUniformMatrix4fv(loc_uModel, false, model.floatArray());
-
 
         textureBase.bind(shaderProgram, "textureBase", 0);
         textureNormal.bind(shaderProgram, "textureNormal", 1);
@@ -159,7 +165,7 @@ public class Renderer extends AbstractRenderer {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             if (key == GLFW_KEY_F)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            if (key == GLFW_KEY_P)
+            if (key == GLFW_KEY_H)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             if (key == GLFW_KEY_W)
                 camera = camera.forward(CAM_SPEED);
@@ -169,6 +175,10 @@ public class Renderer extends AbstractRenderer {
                 camera = camera.left(CAM_SPEED);
             if (key == GLFW_KEY_D)
                 camera = camera.right(CAM_SPEED);
+            if (key == GLFW_KEY_O)
+                glUniformMatrix4fv(loc_uProj, false, orthogonal.floatArray());
+            if (key == GLFW_KEY_P)
+                glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
         }
     };
 }
