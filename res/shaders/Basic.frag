@@ -11,6 +11,10 @@ uniform sampler2D textureHeight;
 
 out vec4 outColor;
 
+const float constantAttenuation = 1.0;
+const float linearAttenuation = 0.1;
+const float quadraticAttenuation = 0.01;
+
 vec4 ambientColor = vec4(0.1f, 0.1f, 0.1f, 1.f);
 vec4 diffuseColor = vec4(0.5f, 0.5f, 0.5f, 1.f);
 vec4 specularColor = vec4(0.5f, 0.5f, 0.5f, 1.f);
@@ -18,8 +22,8 @@ vec4 specularColor = vec4(0.5f, 0.5f, 0.5f, 1.f);
 void main() {
     //Parallax mapping calculations
     float height = texture(textureHeight, texCoords).r;
-    float scaleL = 0.02;
-    float scaleK = 0.f;
+    float scaleL = 0.04f;
+    float scaleK = -0.02f;
     float v = height * scaleL + scaleK;
     vec3 eye = normalize(viewVec);
     vec2 offset = eye.xy * v;
@@ -37,9 +41,12 @@ void main() {
     float NDotL = max(dot(nd, ld), 0.f);
     float NdotHV = max(0.f, dot(nd, normalize(ld + viewVec)));
 
+    //attenuation
+    float dis = length(lightVec);
+    float att = 1.0 / (constantAttenuation + linearAttenuation * dis + quadraticAttenuation * pow(dis,2.0f));
     vec4 ambient = ambientColor;
     vec4 diffuse = NDotL * diffuseColor;
     vec4 specular = specularColor * pow(NdotHV,10.0);
 
-    outColor.rgb = baseColor.xyz * (diffuse.rgb + ambient.rgb) + specular.rgb;
+    outColor = ambient * baseColor + att * (diffuse * baseColor + specular);
 }
