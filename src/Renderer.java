@@ -21,7 +21,7 @@ public class Renderer extends AbstractRenderer {
     private Mat4 orthogonal;
     private Mat4 model = new Mat4Identity();
     private int shaderProgram;
-    int loc_uProj;
+    int loc_uProj, loc_uFunction;
     private Grid grid;
     private double ox, oy;
     private OGLTexture2D textureBase;
@@ -56,8 +56,7 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
 
         // Function
-        int loc_uFunction = glGetUniformLocation(shaderProgram, "u_Function");
-        glUniform1i(loc_uFunction, 1);
+        loc_uFunction = glGetUniformLocation(shaderProgram, "u_Function");
 
         // Light Source
         int loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
@@ -158,27 +157,28 @@ public class Renderer extends AbstractRenderer {
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
-            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
-                // We will detect this in our rendering loop
-                glfwSetWindowShouldClose(window, true);
-            if (key == GLFW_KEY_G)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            if (key == GLFW_KEY_F)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            if (key == GLFW_KEY_H)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-            if (key == GLFW_KEY_W)
-                camera = camera.forward(CAM_SPEED);
-            if (key == GLFW_KEY_S)
-                camera = camera.backward(CAM_SPEED);
-            if (key == GLFW_KEY_A)
-                camera = camera.left(CAM_SPEED);
-            if (key == GLFW_KEY_D)
-                camera = camera.right(CAM_SPEED);
-            if (key == GLFW_KEY_O)
-                glUniformMatrix4fv(loc_uProj, false, orthogonal.floatArray());
-            if (key == GLFW_KEY_P)
-                glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
+            switch (key) {
+                case GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(window, true);
+                // Rasterization mode
+                case GLFW_KEY_G -> glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                case GLFW_KEY_F -> glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                case GLFW_KEY_H -> glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                // Movement
+                case GLFW_KEY_W -> camera = camera.forward(CAM_SPEED);
+                case GLFW_KEY_S -> camera = camera.backward(CAM_SPEED);
+                case GLFW_KEY_A -> camera = camera.left(CAM_SPEED);
+                case GLFW_KEY_D -> camera = camera.right(CAM_SPEED);
+                // Projection mode
+                case GLFW_KEY_O -> glUniformMatrix4fv(loc_uProj, false, orthogonal.floatArray());
+                case GLFW_KEY_P -> glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
+                // Object
+                case GLFW_KEY_1 -> glUniform1i(loc_uFunction, 1);
+                case GLFW_KEY_2 -> glUniform1i(loc_uFunction, 2);
+                case GLFW_KEY_3 -> glUniform1i(loc_uFunction,3);
+                case GLFW_KEY_4 -> glUniform1i(loc_uFunction,4);
+                case GLFW_KEY_5 -> glUniform1i(loc_uFunction,5);
+                case GLFW_KEY_6 -> glUniform1i(loc_uFunction,6);
+            }
         }
     };
 }

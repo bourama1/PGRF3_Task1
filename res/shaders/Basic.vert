@@ -1,4 +1,5 @@
 #version 330
+#define PI 3.1415926538
 
 in vec2 inPosition;
 
@@ -17,16 +18,6 @@ const float delta = 0.001f;
 
 // Object functions
 // Kartezske sour.
-vec3 funcDonut(vec2 inPos) {
-    inPos.x *= 6.3f;
-    inPos.y *= 6.3f;
-    texCoords = mod(texCoords * vec2(2.0, 3.0), vec2(1.0, 1.0));
-    float x = cos(inPos.x) * (3 + cos(inPos.y));
-    float y = sin(inPos.x) * (3 + cos(inPos.y));
-    float z = sin(inPos.y);
-    return vec3(x, y, z);
-}
-
 vec3 funcFlower(vec2 inPos) {
     float x = inPos.x * 2 - 1;
     float y = inPos.y * 2 - 1;
@@ -34,10 +25,48 @@ vec3 funcFlower(vec2 inPos) {
     return vec3(x, y, z);
 }
 
+vec3 funcDonut(vec2 inPos) {
+    inPos.x *= 6.3f;
+    inPos.y *= 6.3f;
+    float x = cos(inPos.x) * (3 + cos(inPos.y));
+    float y = sin(inPos.x) * (3 + cos(inPos.y));
+    float z = sin(inPos.y);
+    return vec3(x, y, z);
+}
+
+// Sfericke
+vec3 funcElephantHead(vec2 inPos) {
+    float zenit = inPos.x * PI;
+    float azimut = inPos.y * 2.f * PI;
+
+    float r = 3 + cos(4.f * azimut);
+
+    return vec3(
+            sin(zenit) * cos(azimut) * r,
+            sin(zenit) * sin(azimut) * r,
+            cos(zenit) * r);
+}
+
+// Cylindricke
+vec3 funcSombrero(vec2 inPos) {
+    float r = inPos.x * 2.f * PI;
+    float azimut = inPos.y * 2.f * PI;
+
+    float v = 2.f * sin(r);
+
+    return vec3(
+            cos(azimut) * r,
+            sin(azimut) * r,
+            v
+    );
+}
+
 vec3 paramPos(vec2 inPosition){
     switch (u_Function) {
-            case 0: return funcDonut(inPosition);
             case 1: return funcFlower(inPosition);
+            case 2: return funcDonut(inPosition);
+            case 3: return funcElephantHead(inPosition);
+            case 5: return funcSombrero(inPosition);
             default: return vec3(inPosition, 0.f);
     }
 }
