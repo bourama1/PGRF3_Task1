@@ -66,7 +66,6 @@ public class Grid {
             if(i != m - 2)
                 indicesStrip[index++] = 65535;
         }
-        System.out.println("Strip: " + Arrays.toString(indicesStrip));
     }
 
     private void createIBList(int m, int n) {
@@ -87,7 +86,6 @@ public class Grid {
                 indicesList[index++] = (j + n + 1) + offset;
             }
         }
-        System.out.println("List: " + Arrays.toString(indicesList));
     }
 
     public OGLBuffers getBuffers() {

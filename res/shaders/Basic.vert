@@ -7,8 +7,12 @@ uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform mat4 u_Model;
 
-uniform int u_Function;
 uniform vec3 u_LightSource;
+
+uniform int u_Function;
+uniform int u_TimeRunning;
+
+uniform float u_Time;
 
 out vec2 texCoords;
 out vec3 viewVec;
@@ -18,28 +22,38 @@ const float delta = 0.001f;
 
 // Object functions
 // Kartezske sour.
-vec3 funcFlower(vec2 inPos) {
+vec3 objFlower(vec2 inPos) {
     float x = inPos.x * 2 - 1;
     float y = inPos.y * 2 - 1;
     float z = 0.5f * cos(sqrt(20.f * x * x + 20.f * y * y));
+
+    if(u_TimeRunning == 1)
+            return vec3(x, y, z) * u_Time;
+
     return vec3(x, y, z);
 }
 
-vec3 funcDonut(vec2 inPos) {
+vec3 objDonut(vec2 inPos) {
     inPos.x *= 6.3f;
     inPos.y *= 6.3f;
     float x = cos(inPos.x) * (3 + cos(inPos.y));
     float y = sin(inPos.x) * (3 + cos(inPos.y));
     float z = sin(inPos.y);
+
+    if(u_TimeRunning == 1)
+            return vec3(x, y, z) * u_Time;
+
     return vec3(x, y, z);
 }
 
 // Sfericke
-vec3 funcElephantHead(vec2 inPos) {
+vec3 objElephantHead(vec2 inPos) {
     float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
+    float r = 3.f + cos(4.f * azimut);
 
-    float r = 3 + cos(4.f * azimut);
+    if(u_TimeRunning == 1)
+            r *= u_Time;
 
     return vec3(
             sin(zenit) * cos(azimut) * r,
@@ -47,12 +61,43 @@ vec3 funcElephantHead(vec2 inPos) {
             cos(zenit) * r);
 }
 
-// Cylindricke
-vec3 funcSombrero(vec2 inPos) {
-    float r = inPos.x * 2.f * PI;
+vec3 objShell(vec2 inPos) {
+    float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
+    float r = sin(zenit) * azimut;
 
+    if(u_TimeRunning == 1)
+            r *= u_Time;
+
+    return vec3(
+        sin(zenit) * cos(azimut) * r,
+        sin(zenit) * sin(azimut) * r,
+        cos(zenit) * r);
+}
+
+// Cylindricke
+vec3 objSombrero(vec2 inPos) {
+    float r = inPos.x * 2.f * PI;
+    if(u_TimeRunning == 1)
+            r *= u_Time;
+
+    float azimut = inPos.y * 2.f * PI;
     float v = 2.f * sin(r);
+
+    return vec3(
+            cos(azimut) * r,
+            sin(azimut) * r,
+            v
+    );
+}
+
+vec3 objWineGlass(vec2 inPos){
+    float azimut = PI * 0.5 - PI * inPos.x * 2;
+    float v = PI * 0.5 - PI * inPos.y * 2;
+    float r = 1.f + cos(v);
+
+    if(u_TimeRunning == 1)
+            r *= u_Time;
 
     return vec3(
             cos(azimut) * r,
@@ -63,10 +108,12 @@ vec3 funcSombrero(vec2 inPos) {
 
 vec3 paramPos(vec2 inPosition){
     switch (u_Function) {
-            case 1: return funcFlower(inPosition);
-            case 2: return funcDonut(inPosition);
-            case 3: return funcElephantHead(inPosition);
-            case 5: return funcSombrero(inPosition);
+            case 1: return objFlower(inPosition);
+            case 2: return objDonut(inPosition);
+            case 3: return objElephantHead(inPosition);
+            case 4: return objShell(inPosition);
+            case 5: return objSombrero(inPosition);
+            case 6: return objWineGlass(inPosition);
             default: return vec3(inPosition, 0.f);
     }
 }

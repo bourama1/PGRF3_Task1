@@ -21,7 +21,9 @@ public class Renderer extends AbstractRenderer {
     private Mat4 orthogonal;
     private Mat4 model = new Mat4Identity();
     private int shaderProgram;
-    int loc_uProj, loc_uFunction;
+    private boolean timeRun = false;
+    private int loc_uProj, loc_uFunction, loc_uTime, loc_uTimeRunning;
+    private float time = 0.f;
     private Grid grid;
     private double ox, oy;
     private OGLTexture2D textureBase;
@@ -40,8 +42,8 @@ public class Renderer extends AbstractRenderer {
                 .withZenith(Math.PI * -0.125)
                 .withFirstPerson(false)
                 .withRadius(3.f);
-        projection = new Mat4PerspRH(Math.PI / 3, HEIGHT / (double) WIDTH, 0.1f, 50.f);
-        orthogonal = new Mat4OrthoRH(HEIGHT/100.f, WIDTH/100.f, 0.1f, 50.f);
+        projection = new Mat4PerspRH(Math.PI / 3, HEIGHT / (double) WIDTH, 0.1f, 100.f);
+        orthogonal = new Mat4OrthoRH(HEIGHT/100.f, WIDTH/100.f, 0.1f, 100.f);
 
         //Shaders
         this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
@@ -58,11 +60,15 @@ public class Renderer extends AbstractRenderer {
         // Function
         loc_uFunction = glGetUniformLocation(shaderProgram, "u_Function");
 
+        // Time Running
+        loc_uTimeRunning = glGetUniformLocation(shaderProgram,"u_TimeRunning");
+
+
         // Light Source
         int loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
         glUniform3f(loc_uLightSource, 0.5f, 0.5f, 0.5f);
 
-        grid = new Grid(20,20, Topology.STRIP);
+        grid = new Grid(100,100, Topology.STRIP);
 
         try {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
@@ -84,6 +90,11 @@ public class Renderer extends AbstractRenderer {
         // Model
         int loc_uModel = glGetUniformLocation(shaderProgram, "u_Model");
         glUniformMatrix4fv(loc_uModel, false, model.floatArray());
+
+        // Time
+        loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
+        glUniform1f(loc_uTime, time);
+        time += 0.0001f;
 
         textureBase.bind(shaderProgram, "textureBase", 0);
         textureNormal.bind(shaderProgram, "textureNormal", 1);
@@ -162,7 +173,10 @@ public class Renderer extends AbstractRenderer {
                 // Rasterization mode
                 case GLFW_KEY_G -> glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 case GLFW_KEY_F -> glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                case GLFW_KEY_H -> glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                case GLFW_KEY_H -> {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+                    glPointSize(5.f);
+                }
                 // Movement
                 case GLFW_KEY_W -> camera = camera.forward(CAM_SPEED);
                 case GLFW_KEY_S -> camera = camera.backward(CAM_SPEED);
@@ -178,6 +192,20 @@ public class Renderer extends AbstractRenderer {
                 case GLFW_KEY_4 -> glUniform1i(loc_uFunction,4);
                 case GLFW_KEY_5 -> glUniform1i(loc_uFunction,5);
                 case GLFW_KEY_6 -> glUniform1i(loc_uFunction,6);
+                // Time run
+                case GLFW_KEY_T -> {
+                    if(action != GLFW_RELEASE)
+                        return;
+                    if(timeRun) {
+                        timeRun = false;
+                        glUniform1i(loc_uTimeRunning, 0);
+                    }
+                    else {
+                        timeRun = true;
+                        glUniform1i(loc_uTimeRunning, 1);
+                        time = 0;
+                    }
+                }
             }
         }
     };
