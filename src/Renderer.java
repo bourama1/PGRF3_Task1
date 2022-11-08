@@ -22,7 +22,9 @@ public class Renderer extends AbstractRenderer {
     private Mat4 model = new Mat4Identity();
     private int shaderProgram;
     private boolean timeRun = false;
-    private int loc_uProj, loc_uFunction, loc_uTime, loc_uTimeRunning;
+    private int loc_uProj;
+    private int loc_uFunction;
+    private int loc_uTimeRunning;
     private float time = 0.f;
     private Grid grid;
     private double ox, oy;
@@ -35,6 +37,7 @@ public class Renderer extends AbstractRenderer {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(65535);
+        glPointSize(5.f);
 
         camera = new Camera()
                 .withPosition(new Vec3D(0.f, 0.f, 0.f))
@@ -92,7 +95,7 @@ public class Renderer extends AbstractRenderer {
         glUniformMatrix4fv(loc_uModel, false, model.floatArray());
 
         // Time
-        loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
+        int loc_uTime = glGetUniformLocation(shaderProgram, "u_Time");
         glUniform1f(loc_uTime, time);
         time += 0.0001f;
 
@@ -168,15 +171,14 @@ public class Renderer extends AbstractRenderer {
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
+            if(action != GLFW_RELEASE)
+                return;
             switch (key) {
                 case GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(window, true);
                 // Rasterization mode
                 case GLFW_KEY_G -> glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 case GLFW_KEY_F -> glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                case GLFW_KEY_H -> {
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-                    glPointSize(5.f);
-                }
+                case GLFW_KEY_H -> glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
                 // Movement
                 case GLFW_KEY_W -> camera = camera.forward(CAM_SPEED);
                 case GLFW_KEY_S -> camera = camera.backward(CAM_SPEED);
@@ -194,8 +196,6 @@ public class Renderer extends AbstractRenderer {
                 case GLFW_KEY_6 -> glUniform1i(loc_uFunction,6);
                 // Time run
                 case GLFW_KEY_T -> {
-                    if(action != GLFW_RELEASE)
-                        return;
                     if(timeRun) {
                         timeRun = false;
                         glUniform1i(loc_uTimeRunning, 0);
@@ -206,6 +206,9 @@ public class Renderer extends AbstractRenderer {
                         time = 0;
                     }
                 }
+                // Model transforms
+                case GLFW_KEY_EQUAL -> model = model.mul(new Mat4Scale(1.1f));
+                case GLFW_KEY_MINUS -> model = model.mul(new Mat4Scale(0.9f));
             }
         }
     };

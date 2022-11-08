@@ -1,8 +1,6 @@
 import Utils.Topology;
 import lwjglutils.OGLBuffers;
 
-import java.util.Arrays;
-
 public class Grid {
     private OGLBuffers buffers;
     private float[] vertices;

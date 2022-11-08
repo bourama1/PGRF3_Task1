@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.Objects;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -15,7 +16,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Main {
     // The window handle
     private long window;
-    private AbstractRenderer renderer;
+    private final AbstractRenderer renderer;
     public Main(AbstractRenderer renderer) {
         this.renderer = renderer;
     }
@@ -32,7 +33,7 @@ public class Main {
 
         // Terminate GLFW and free the error callback
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
+        Objects.requireNonNull(glfwSetErrorCallback(null)).free();
     }
 
     private void init() {
@@ -73,11 +74,13 @@ public class Main {
             GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
             // Center the window
-            glfwSetWindowPos(
-                    window,
-                    (vidMode.width() - pWidth.get(0)) / 2,
-                    (vidMode.height() - pHeight.get(0)) / 2
-            );
+            if (vidMode != null) {
+                glfwSetWindowPos(
+                        window,
+                        (vidMode.width() - pWidth.get(0)) / 2,
+                        (vidMode.height() - pHeight.get(0)) / 2
+                );
+            }
         } // the stack frame is popped automatically
 
         // Make the OpenGL context current
