@@ -106,7 +106,7 @@ vec3 objWineGlass(vec2 inPos){
     );
 }
 
-vec3 paramPos(vec2 inPosition){
+vec3 posCalc(vec2 inPosition){
     switch (u_Function) {
             case 1: return objFlower(inPosition);
             case 2: return objDonut(inPosition);
@@ -119,13 +119,13 @@ vec3 paramPos(vec2 inPosition){
 }
 
 vec3 getNormal(vec2 inPos){
-    vec3 tx = (paramPos(inPos + vec2(delta,0)) - paramPos(inPos - vec2(delta,0))) / vec3(1.f,1.f,2 * delta);
-    vec3 ty = paramPos(inPos + vec2(0,delta)) - paramPos(inPos - vec2(0,delta)) / vec3(1.f,1.f,2 * delta);
+    vec3 tx = (posCalc(inPos + vec2(delta, 0)) - posCalc(inPos - vec2(delta, 0))) / vec3(1.f, 1.f, 2 * delta);
+    vec3 ty = (posCalc(inPos + vec2(0, delta)) - posCalc(inPos - vec2(0, delta))) / vec3(1.f, 1.f, 2 * delta);
     return cross(tx,ty);
 }
 
 mat3 getTBN(vec2 inPos, vec3 normal) {
-    vec3 vTan = (paramPos(inPos + vec2(delta,0)) - paramPos(inPos - vec2(delta,0))) / vec3(1.f,1.f,2 * delta);
+    vec3 vTan = (posCalc(inPos + vec2(delta, 0)) - posCalc(inPos - vec2(delta, 0))) / vec3(1.f, 1.f, 2 * delta);
     vTan = normalize(vTan);
     vec3 vBi = cross(normal,vTan);
     vTan = cross(vBi,normal);
@@ -135,7 +135,7 @@ mat3 getTBN(vec2 inPos, vec3 normal) {
 
 void main() {
     texCoords = inPosition;
-    vec4 objectPosition = u_View * u_Model * vec4(paramPos(inPosition), 1.f);
+    vec4 objectPosition = u_View * u_Model * vec4(posCalc(inPosition), 1.f);
 
     //Light
     vec3 viewDirection = normalize(- objectPosition.xyz);
