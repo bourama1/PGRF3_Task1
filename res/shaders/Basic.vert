@@ -15,6 +15,7 @@ uniform int u_TimeRunning;
 uniform float u_Time;
 
 out vec2 texCoords;
+out vec2 texScale;
 out vec3 viewVec;
 out vec3 lightVec;
 
@@ -24,7 +25,7 @@ float scale = 1.0f;
 // Object functions
 // Kartezske sour.
 vec3 objFlower(vec2 inPos) {
-    scale = 2.f;
+    texScale = vec2(2.f);
     float x = inPos.x * 2 - 1;
     float y = inPos.y * 2 - 1;
     float z = 0.5f * cos(sqrt(20.f * x * x + 20.f * y * y));
@@ -36,7 +37,7 @@ vec3 objFlower(vec2 inPos) {
 }
 
 vec3 objDonut(vec2 inPos) {
-    scale = 6.3f;
+    texScale = vec2(6.3f);
     inPos.x *= 6.3f;
     inPos.y *= 6.3f;
     float x = cos(inPos.x) * (3 + cos(inPos.y));
@@ -51,7 +52,7 @@ vec3 objDonut(vec2 inPos) {
 
 // Sfericke
 vec3 objElephantHead(vec2 inPos) {
-    scale = 2.f * PI;
+    texScale = vec2(PI);
     float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
     float r = 3.f + cos(4.f * azimut);
@@ -66,7 +67,7 @@ vec3 objElephantHead(vec2 inPos) {
 }
 
 vec3 objShell(vec2 inPos) {
-    scale = 2.f * PI;
+    texScale = vec2(PI);
     float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
     float r = sin(zenit) * azimut;
@@ -82,7 +83,7 @@ vec3 objShell(vec2 inPos) {
 
 // Cylindricke
 vec3 objSombrero(vec2 inPos) {
-    scale = 2.f * PI;
+    texScale = vec2(PI);
     float r = inPos.x * 2.f * PI;
     if(u_TimeRunning == 1)
             r *= u_Time;
@@ -98,7 +99,7 @@ vec3 objSombrero(vec2 inPos) {
 }
 
 vec3 objWineGlass(vec2 inPos){
-    scale = 2.f * PI;
+    texScale = vec2(PI);
     float azimut = PI * 0.5 - PI * inPos.x * 2;
     float v = PI * 0.5 - PI * inPos.y * 2;
     float r = 1.f + cos(v);
@@ -138,7 +139,10 @@ mat3 getTBN(vec2 inPos) {
 
 
 void main() {
-    texCoords = inPosition.xy * scale;
+    //Texture
+    texScale = vec2(1.f,1.f);
+    texCoords = inPosition.xy;
+
     vec4 objectPosition = u_View * u_Model * vec4(posCalc(inPosition), 1.f);
 
     //Light
@@ -148,7 +152,6 @@ void main() {
 
     //TBN
     mat3 tbn = getTBN(inPosition);
-
     viewVec = transpose(tbn) * viewDirection;
     lightVec = transpose(tbn) * toLightVector;
 

@@ -1,6 +1,7 @@
 #version 330
 
 in vec2 texCoords;
+in vec2 texScale;
 in vec3 lightVec;
 in vec3 viewVec;
 
@@ -21,7 +22,7 @@ vec4 specularColor = vec4(0.7f, 0.7f, 0.7f, 1.f);
 
 void main() {
     //Texture calc
-    vec2 coord = mod(texCoords * vec2(2.0, 2.0), vec2(1.0, 1.0));
+    vec2 coord = mod(texCoords * texScale, vec2(1.0, 1.0));
     //Parallax mapping calculations
     float height = texture(textureHeight, coord).r;
     float scaleL = 0.04f;
