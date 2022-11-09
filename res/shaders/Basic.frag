@@ -16,12 +16,14 @@ const float linearAttenuation = 0.1;
 const float quadraticAttenuation = 0.01;
 
 vec4 ambientColor = vec4(0.1f, 0.1f, 0.1f, 1.f);
-vec4 diffuseColor = vec4(0.5f, 0.5f, 0.5f, 1.f);
-vec4 specularColor = vec4(0.5f, 0.5f, 0.5f, 1.f);
+vec4 diffuseColor = vec4(0.7f, 0.7f, 0.7f, 1.f);
+vec4 specularColor = vec4(0.7f, 0.7f, 0.7f, 1.f);
 
 void main() {
+    //Texture calc
+    vec2 coord = mod(texCoords * vec2(2.0, 2.0), vec2(1.0, 1.0));
     //Parallax mapping calculations
-    float height = texture(textureHeight, texCoords).r;
+    float height = texture(textureHeight, coord).r;
     float scaleL = 0.04f;
     float scaleK = -0.02f;
     float v = height * scaleL + scaleK;
@@ -29,8 +31,8 @@ void main() {
     vec2 offset = eye.xy * v;
 
     //Texture readings with parallax offset
-    vec4 baseColor = texture(textureBase, texCoords);
-    vec4 textureColor = texture(textureNormal, texCoords + offset);
+    vec4 baseColor = texture(textureBase, coord);
+    vec4 textureColor = texture(textureNormal, coord + offset);
 
     //Tangent space
     vec3 normal = textureColor.rgb * 2.f - 1.f;

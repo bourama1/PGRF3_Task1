@@ -67,10 +67,9 @@ public class Renderer extends AbstractRenderer {
         // Time Running
         loc_uTimeRunning = glGetUniformLocation(shaderProgram,"u_TimeRunning");
 
-
         // Light Source
         int loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
-        glUniform3f(loc_uLightSource, 0.5f, 0.5f, 0.5f);
+        glUniform3f(loc_uLightSource, 0f, 0f, 5.f);
 
         grid = new Grid(100,100, Topology.STRIP);
 
