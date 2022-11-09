@@ -19,10 +19,12 @@ out vec3 viewVec;
 out vec3 lightVec;
 
 const float delta = 0.001f;
+float scale = 1.0f;
 
 // Object functions
 // Kartezske sour.
 vec3 objFlower(vec2 inPos) {
+    scale = 2.f;
     float x = inPos.x * 2 - 1;
     float y = inPos.y * 2 - 1;
     float z = 0.5f * cos(sqrt(20.f * x * x + 20.f * y * y));
@@ -34,6 +36,7 @@ vec3 objFlower(vec2 inPos) {
 }
 
 vec3 objDonut(vec2 inPos) {
+    scale = 6.3f;
     inPos.x *= 6.3f;
     inPos.y *= 6.3f;
     float x = cos(inPos.x) * (3 + cos(inPos.y));
@@ -48,6 +51,7 @@ vec3 objDonut(vec2 inPos) {
 
 // Sfericke
 vec3 objElephantHead(vec2 inPos) {
+    scale = 2.f * PI;
     float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
     float r = 3.f + cos(4.f * azimut);
@@ -62,6 +66,7 @@ vec3 objElephantHead(vec2 inPos) {
 }
 
 vec3 objShell(vec2 inPos) {
+    scale = 2.f * PI;
     float zenit = inPos.x * PI;
     float azimut = inPos.y * 2.f * PI;
     float r = sin(zenit) * azimut;
@@ -77,6 +82,7 @@ vec3 objShell(vec2 inPos) {
 
 // Cylindricke
 vec3 objSombrero(vec2 inPos) {
+    scale = 2.f * PI;
     float r = inPos.x * 2.f * PI;
     if(u_TimeRunning == 1)
             r *= u_Time;
@@ -92,6 +98,7 @@ vec3 objSombrero(vec2 inPos) {
 }
 
 vec3 objWineGlass(vec2 inPos){
+    scale = 2.f * PI;
     float azimut = PI * 0.5 - PI * inPos.x * 2;
     float v = PI * 0.5 - PI * inPos.y * 2;
     float r = 1.f + cos(v);
@@ -118,15 +125,12 @@ vec3 posCalc(vec2 inPosition){
     }
 }
 
-vec3 getNormal(vec2 inPos){
+mat3 getTBN(vec2 inPos) {
     vec3 tx = (posCalc(inPos + vec2(delta, 0)) - posCalc(inPos - vec2(delta, 0))) / vec3(1.f, 1.f, 2 * delta);
     vec3 ty = (posCalc(inPos + vec2(0, delta)) - posCalc(inPos - vec2(0, delta))) / vec3(1.f, 1.f, 2 * delta);
-    return cross(tx,ty);
-}
-
-mat3 getTBN(vec2 inPos, vec3 normal) {
-    vec3 vTan = (posCalc(inPos + vec2(delta, 0)) - posCalc(inPos - vec2(delta, 0))) / vec3(1.f, 1.f, 2 * delta);
-    vTan = normalize(vTan);
+    vec3 normal = cross(tx,ty);
+    normal = normalize(inverse(transpose(mat3(u_View * u_Model))) * normal);
+    vec3 vTan = normalize(tx);
     vec3 vBi = cross(normal,vTan);
     vTan = cross(vBi,normal);
     return mat3(vTan,vBi,normal);
@@ -134,7 +138,7 @@ mat3 getTBN(vec2 inPos, vec3 normal) {
 
 
 void main() {
-    texCoords = inPosition;
+    texCoords = inPosition.xy * scale;
     vec4 objectPosition = u_View * u_Model * vec4(posCalc(inPosition), 1.f);
 
     //Light
@@ -143,9 +147,7 @@ void main() {
     vec3 toLightVector = normalize(lightPosition.xyz - objectPosition.xyz);
 
     //TBN
-    vec3 normal = getNormal(inPosition);
-    normal = normalize(inverse(transpose(mat3(u_View * u_Model))) * normal);
-    mat3 tbn = getTBN(inPosition, normal);
+    mat3 tbn = getTBN(inPosition);
 
     viewVec = transpose(tbn) * viewDirection;
     lightVec = transpose(tbn) * toLightVector;

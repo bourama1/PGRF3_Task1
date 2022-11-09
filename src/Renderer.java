@@ -39,6 +39,7 @@ public class Renderer extends AbstractRenderer {
         glPrimitiveRestartIndex(65535);
         glPointSize(5.f);
 
+
         camera = new Camera()
                 .withPosition(new Vec3D(0.f, 0.f, 0.f))
                 .withAzimuth(Math.PI * 1.25)
@@ -77,6 +78,8 @@ public class Renderer extends AbstractRenderer {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
             textureNormal = new OGLTexture2D("textures/bricksNormal.png");
             textureHeight = new OGLTexture2D("textures/bricksHeight.png");
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         } catch (IOException e) {
@@ -86,6 +89,9 @@ public class Renderer extends AbstractRenderer {
 
     @Override
     public void display() {
+        glViewport(0, 0, WIDTH, HEIGHT);
+        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
         // View
         int loc_uView = glGetUniformLocation(shaderProgram, "u_View");
         glUniformMatrix4fv(loc_uView, false, camera.getViewMatrix().floatArray());
