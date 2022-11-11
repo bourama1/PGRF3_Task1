@@ -46,14 +46,14 @@ void main() {
 
     //attenuation
     float dis = length(lightVec);
-    float att = 1.0 / (constantAttenuation + linearAttenuation * dis + quadraticAttenuation * pow(dis,2.0f));
+    float att = 1.0 / (constantAttenuation + linearAttenuation * dis + quadraticAttenuation * pow(dis, 2.0f));
     vec4 ambient = ambientColor;
     vec4 diffuse = NDotL * diffuseColor;
-    vec4 specular = specularColor * pow(NdotHV,10.0);
+    vec4 specular = specularColor * pow(NdotHV, 10.0);
 
     outColor = ambient * baseColor + att * (diffuse * baseColor + specular);
 
     //Light object
-    if(u_Grid == 2)
-            outColor = vec4(1.f);
+    if (u_Grid == 2)
+        outColor = vec4(1.f);
 }

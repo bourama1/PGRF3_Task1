@@ -14,11 +14,16 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Main {
+    private final AbstractRenderer renderer;
     // The window handle
     private long window;
-    private final AbstractRenderer renderer;
+
     public Main(AbstractRenderer renderer) {
         this.renderer = renderer;
+    }
+
+    public static void main(String[] args) {
+        new Main(new Renderer()).run();
     }
 
     public void run() {
@@ -42,7 +47,7 @@ public class Main {
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if ( !glfwInit() )
+        if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
 
         // Configure GLFW
@@ -52,18 +57,18 @@ public class Main {
 
         // Create the window
         window = glfwCreateWindow(800, 600, "bourama1 PGRF3", NULL, NULL);
-        if ( window == NULL )
+        if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
 
         // Set up a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, renderer.getKeyCallback());
-        glfwSetWindowSizeCallback(window,renderer.getWsCallback());
-        glfwSetMouseButtonCallback(window,renderer.getMouseCallback());
-        glfwSetCursorPosCallback(window,renderer.getCursorCallback());
-        glfwSetScrollCallback(window,renderer.getScrollCallback());
+        glfwSetWindowSizeCallback(window, renderer.getWsCallback());
+        glfwSetMouseButtonCallback(window, renderer.getMouseCallback());
+        glfwSetCursorPosCallback(window, renderer.getCursorCallback());
+        glfwSetScrollCallback(window, renderer.getScrollCallback());
 
         // Get the thread stack and push a new frame
-        try ( MemoryStack stack = stackPush() ) {
+        try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
@@ -105,7 +110,7 @@ public class Main {
         renderer.init();
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
-        while ( !glfwWindowShouldClose(window) ) {
+        while (!glfwWindowShouldClose(window)) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             renderer.display();
@@ -116,9 +121,5 @@ public class Main {
             // invoked during this call.
             glfwPollEvents();
         }
-    }
-
-    public static void main(String[] args) {
-        new Main(new Renderer()).run();
     }
 }

@@ -12,10 +12,10 @@ public class Grid {
      * @param n vertex count in column
      *          Creates a new vertex buffer and index buffer for grid based on type of topology
      */
-    public Grid(final int m, final int n, Topology type){
+    public Grid(final int m, final int n, Topology type) {
         createVB(m, n);
 
-        OGLBuffers.Attrib[] attrs = new OGLBuffers.Attrib[] {
+        OGLBuffers.Attrib[] attrs = new OGLBuffers.Attrib[]{
                 new OGLBuffers.Attrib("inPosition", 2),
         };
 
@@ -37,7 +37,7 @@ public class Grid {
      * @param n vertex count in column
      *          Creates a new vertex buffer
      */
-    private void createVB(final int n, final int m){
+    private void createVB(final int n, final int m) {
         vertices = new float[2 * m * n];
 
         // Vertices <0;1>
@@ -64,16 +64,15 @@ public class Grid {
         int index = 0;
         for (int i = 0; i < m - 1; i++) {
             int offset = i * m;
-            for (int j = 0; j < n - 1; j++)
-            {
-                if(j == 0) {
+            for (int j = 0; j < n - 1; j++) {
+                if (j == 0) {
                     indicesStrip[index++] = j + offset;
                     indicesStrip[index++] = (j + n) + offset;
                 }
                 indicesStrip[index++] = (j + 1) + offset;
                 indicesStrip[index++] = (j + n + 1) + offset;
             }
-            if(i != m - 2)
+            if (i != m - 2)
                 indicesStrip[index++] = 65535;
         }
     }
@@ -92,8 +91,7 @@ public class Grid {
         int index = 0;
         for (int i = 0; i < m - 1; i++) {
             int offset = i * m;
-            for (int j = 0; j < n - 1; j++)
-            {
+            for (int j = 0; j < n - 1; j++) {
                 indicesList[index++] = j + offset;
                 indicesList[index++] = (j + n) + offset;
                 indicesList[index++] = (j + 1) + offset;
