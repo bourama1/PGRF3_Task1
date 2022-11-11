@@ -5,7 +5,7 @@ in vec2 texScale;
 in vec3 lightVec;
 in vec3 viewVec;
 
-uniform float u_ColorR;
+uniform int u_Grid;
 uniform sampler2D textureBase;
 uniform sampler2D textureNormal;
 uniform sampler2D textureHeight;
@@ -52,4 +52,8 @@ void main() {
     vec4 specular = specularColor * pow(NdotHV,10.0);
 
     outColor = ambient * baseColor + att * (diffuse * baseColor + specular);
+
+    //Light object
+    if(u_Grid == 2)
+            outColor = vec4(1.f);
 }

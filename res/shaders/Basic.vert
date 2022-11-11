@@ -11,6 +11,7 @@ uniform vec3 u_LightSource;
 
 uniform int u_Function;
 uniform int u_TimeRunning;
+uniform int u_Grid;
 
 uniform float u_Time;
 
@@ -115,6 +116,10 @@ vec3 objWineGlass(vec2 inPos){
 }
 
 vec3 posCalc(vec2 inPosition){
+    if(u_Grid == 1)
+            return vec3(inPosition, 0.f);
+    else if (u_Grid == 2)
+            return vec3(u_LightSource.x + ((inPosition.x - 0.5f) / 4), u_LightSource.y + ((inPosition.y - 0.5f) / 4), u_LightSource.z);
     switch (u_Function) {
             case 1: return objFlower(inPosition);
             case 2: return objDonut(inPosition);

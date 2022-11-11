@@ -25,8 +25,10 @@ public class Renderer extends AbstractRenderer {
     private int loc_uProj;
     private int loc_uFunction;
     private int loc_uTimeRunning;
+    private int loc_uLightSource;
+    private float lightSourceX = 0.f, lightSourceY = 0.f, lightSourceZ = 1.f;
     private float time = 0.f;
-    private Grid grid;
+    private Grid grid, gridBase, gridLight;
     private double ox, oy;
     private OGLTexture2D textureBase;
     private OGLTexture2D textureNormal;
@@ -53,10 +55,6 @@ public class Renderer extends AbstractRenderer {
         this.shaderProgram = ShaderUtils.loadProgram("/shaders/Basic");
         glUseProgram(shaderProgram);
 
-        // Color
-        int loc_uColorR = glGetUniformLocation(shaderProgram, "u_ColorR");
-        glUniform1f(loc_uColorR, 1.f);
-
         // Proj
         loc_uProj = glGetUniformLocation(shaderProgram, "u_Proj");
         glUniformMatrix4fv(loc_uProj, false, projection.floatArray());
@@ -68,10 +66,12 @@ public class Renderer extends AbstractRenderer {
         loc_uTimeRunning = glGetUniformLocation(shaderProgram,"u_TimeRunning");
 
         // Light Source
-        int loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
-        glUniform3f(loc_uLightSource, 0f, 0f, 5.f);
+        loc_uLightSource = glGetUniformLocation(shaderProgram, "u_LightSource");
+        glUniform3f(loc_uLightSource, lightSourceX, lightSourceY, lightSourceZ);
 
         grid = new Grid(100,100, Topology.STRIP);
+        gridBase = new Grid(10,10, Topology.LIST);
+        gridLight = new Grid(10,10, Topology.LIST);
 
         try {
             textureBase = new OGLTexture2D("./textures/bricks.jpg");
@@ -108,7 +108,15 @@ public class Renderer extends AbstractRenderer {
         textureNormal.bind(shaderProgram, "textureNormal", 1);
         textureHeight.bind(shaderProgram, "textureHeight", 2);
 
+        int loc_UGrid = glGetUniformLocation(shaderProgram, "u_Grid");
+        glUniform1i(loc_UGrid,0);
         grid.getBuffers().draw(GL_TRIANGLE_STRIP, shaderProgram);
+
+        glUniform1i(loc_UGrid,1);
+        gridBase.getBuffers().draw(GL_TRIANGLES, shaderProgram);
+
+        glUniform1i(loc_UGrid,2);
+        gridLight.getBuffers().draw(GL_TRIANGLES, shaderProgram);
     }
 
     @Override
@@ -214,6 +222,10 @@ public class Renderer extends AbstractRenderer {
                 // Model transforms
                 case GLFW_KEY_EQUAL -> model = model.mul(new Mat4Scale(1.1f));
                 case GLFW_KEY_MINUS -> model = model.mul(new Mat4Scale(0.9f));
+                // Light move
+                case GLFW_KEY_X -> glUniform3f(loc_uLightSource, lightSourceX += 0.1f, lightSourceY, lightSourceZ);
+                case GLFW_KEY_Y -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY += 0.1f, lightSourceZ);
+                case GLFW_KEY_Z -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY, lightSourceZ += 0.1f);
             }
         }
     };
