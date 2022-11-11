@@ -115,6 +115,10 @@ vec3 objWineGlass(vec2 inPos){
     );
 }
 
+/**
+*   @param inPosition vec2 vertex position in VB
+*   Returns the position of the object as vec3
+*/
 vec3 posCalc(vec2 inPosition){
     if(u_Grid == 1)
             return vec3(inPosition, 0.f);
@@ -131,6 +135,10 @@ vec3 posCalc(vec2 inPosition){
     }
 }
 
+/**
+*   @param inPosition vec2 vertex position in VB
+*   Returns the matrix (tangent, bitangent, normal)
+*/
 mat3 getTBN(vec2 inPos) {
     vec3 tx = (posCalc(inPos + vec2(delta, 0)) - posCalc(inPos - vec2(delta, 0))) / vec3(1.f, 1.f, 2 * delta);
     vec3 ty = (posCalc(inPos + vec2(0, delta)) - posCalc(inPos - vec2(0, delta))) / vec3(1.f, 1.f, 2 * delta);
@@ -148,6 +156,7 @@ void main() {
     texScale = vec2(1.f,1.f);
     texCoords = inPosition.xy;
 
+    //Object position
     vec4 objectPosition;
     if(u_Grid == 1)
             objectPosition = u_View * vec4(posCalc(inPosition), 1.f);

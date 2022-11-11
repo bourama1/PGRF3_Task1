@@ -6,11 +6,11 @@ public class Grid {
     private float[] vertices;
     private int[] indicesList;
     private int[] indicesStrip;
+
     /**
-     * GL_TRIANGLES
-     *
      * @param m vertex count in row
      * @param n vertex count in column
+     *          Creates a new vertex buffer and index buffer for grid based on type of topology
      */
     public Grid(final int m, final int n, Topology type){
         createVB(m, n);
@@ -32,6 +32,11 @@ public class Grid {
 
     }
 
+    /**
+     * @param m vertex count in row
+     * @param n vertex count in column
+     *          Creates a new vertex buffer
+     */
     private void createVB(final int n, final int m){
         vertices = new float[2 * m * n];
 
@@ -45,6 +50,13 @@ public class Grid {
         }
     }
 
+    /**
+     * GL_TRIANGLE_STRIP
+     *
+     * @param m vertex count in row
+     * @param n vertex count in column
+     *          Creates a new index buffer for strip topology
+     */
     private void createIBStrip(int m, int n) {
         indicesStrip = new int[2 * m * (n - 1) + (n - 2)];
 
@@ -66,6 +78,13 @@ public class Grid {
         }
     }
 
+    /**
+     * GL_TRIANGLES
+     *
+     * @param m vertex count in row
+     * @param n vertex count in column
+     *          Creates a new index buffer for list topology
+     */
     private void createIBList(int m, int n) {
         indicesList = new int[3 * 2 * (m - 1) * (n - 1)];
 

@@ -119,24 +119,6 @@ public class Renderer extends AbstractRenderer {
         gridLight.getBuffers().draw(GL_TRIANGLES, shaderProgram);
     }
 
-    @Override
-    public GLFWScrollCallback getScrollCallback() {
-        return scrollCallback;
-    }
-
-    @Override
-    public GLFWMouseButtonCallback getMouseCallback() {
-        return mbCallback;
-    }
-
-    @Override
-    public GLFWCursorPosCallback getCursorCallback() {
-        return cpCallback;
-    }
-
-    @Override
-    public GLFWKeyCallback getKeyCallback() {return keyCallback;}
-
     private final GLFWCursorPosCallback cpCallback = new GLFWCursorPosCallback() {
         @Override
         public void invoke(long window, double xpos, double ypos) {
@@ -144,6 +126,9 @@ public class Renderer extends AbstractRenderer {
         }
     };
 
+    /**
+     * Setting of LWJGL mouse button callback for camera movement
+     */
     private final GLFWMouseButtonCallback mbCallback = new GLFWMouseButtonCallback () {
         @Override
         public void invoke(long window, int button, int action, int mods) {
@@ -170,6 +155,9 @@ public class Renderer extends AbstractRenderer {
         }
     };
 
+    /**
+     * Setting of LWJGL scroll callback for camera zoom
+     */
     private final GLFWScrollCallback scrollCallback = new GLFWScrollCallback() {
         @Override
         public void invoke(long window, double dx, double dy) {
@@ -181,6 +169,9 @@ public class Renderer extends AbstractRenderer {
         }
     };
 
+    /**
+     * Setting of LWJGL key callbacks
+     */
     private final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
         @Override
         public void invoke(long window, int key, int scancode, int action, int mods) {
@@ -238,4 +229,22 @@ public class Renderer extends AbstractRenderer {
             }
         }
     };
+
+    @Override
+    public GLFWScrollCallback getScrollCallback() {
+        return scrollCallback;
+    }
+
+    @Override
+    public GLFWMouseButtonCallback getMouseCallback() {
+        return mbCallback;
+    }
+
+    @Override
+    public GLFWCursorPosCallback getCursorCallback() {
+        return cpCallback;
+    }
+
+    @Override
+    public GLFWKeyCallback getKeyCallback() {return keyCallback;}
 }
