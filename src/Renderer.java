@@ -222,10 +222,19 @@ public class Renderer extends AbstractRenderer {
                 // Model transforms
                 case GLFW_KEY_EQUAL -> model = model.mul(new Mat4Scale(1.1f));
                 case GLFW_KEY_MINUS -> model = model.mul(new Mat4Scale(0.9f));
+                case GLFW_KEY_UP -> model = model.mul(new Mat4Transl(0.f,-0.1f,0.f));
+                case GLFW_KEY_DOWN -> model = model.mul(new Mat4Transl(0.f,0.1f,0.f));
+                case GLFW_KEY_LEFT -> model = model.mul(new Mat4Transl(0.1f,0.f,0.f));
+                case GLFW_KEY_RIGHT -> model = model.mul(new Mat4Transl(-0.1f,0.f,0.f));
+                case GLFW_KEY_PAGE_UP -> model = model.mul(new Mat4Transl(0.f,0.f,0.1f));
+                case GLFW_KEY_PAGE_DOWN -> model = model.mul(new Mat4Transl(0.f,0.f,-0.1f));
                 // Light move
                 case GLFW_KEY_X -> glUniform3f(loc_uLightSource, lightSourceX += 0.1f, lightSourceY, lightSourceZ);
+                case GLFW_KEY_C -> glUniform3f(loc_uLightSource, lightSourceX -= 0.1f, lightSourceY, lightSourceZ);
                 case GLFW_KEY_Y -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY += 0.1f, lightSourceZ);
+                case GLFW_KEY_U -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY -= 0.1f, lightSourceZ);
                 case GLFW_KEY_Z -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY, lightSourceZ += 0.1f);
+                case GLFW_KEY_LEFT_SHIFT -> glUniform3f(loc_uLightSource, lightSourceX, lightSourceY, lightSourceZ -= 0.1f);
             }
         }
     };

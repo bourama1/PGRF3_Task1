@@ -148,11 +148,21 @@ void main() {
     texScale = vec2(1.f,1.f);
     texCoords = inPosition.xy;
 
-    vec4 objectPosition = u_View * u_Model * vec4(posCalc(inPosition), 1.f);
+    vec4 objectPosition;
+    if(u_Grid == 1)
+            objectPosition = u_View * vec4(posCalc(inPosition), 1.f);
+    else
+            objectPosition = u_View * u_Model * vec4(posCalc(inPosition), 1.f);
 
     //Light
     vec3 viewDirection = normalize(- objectPosition.xyz);
-    vec4 lightPosition = u_View * vec4(u_LightSource, 1.);
+
+    vec4 lightPosition;
+    if(u_Grid == 1)
+            lightPosition = u_View * vec4(u_LightSource, 1.);
+    else
+            lightPosition = u_View * u_Model * vec4(u_LightSource, 1.);
+
     vec3 toLightVector = normalize(lightPosition.xyz - objectPosition.xyz);
 
     //TBN
